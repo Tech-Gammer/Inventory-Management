@@ -58,7 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() => _isLoading = false);
     }
   }
-
+//s
   @override
   void dispose() {
     _nameController.dispose();
