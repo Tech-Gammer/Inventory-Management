@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_management/Auth/auth_service.dart';
 import 'package:inventory_management/Auth/login.dart';
-import 'package:inventory_management/Auth/profilePage.dart';
+import 'Customers/ListofCustomers.dart';
+import 'Inventory/inventory.dart';
+import 'Invoce/create invoice.dart';
+import 'Invoce/createQuotes.dart';
+import 'dashBoardScreen.dart';
 
 
 class DashboardPage extends StatefulWidget {
@@ -12,13 +15,19 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    Center(child: Text('Dashboard Overview')),
-    Center(child: Text('Inventory Management')),
-    Center(child: Text('Invoices')),
-    Center(child: Text('Reports')),
-    Center(child: Text('Settings')),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      _buildQuickBooksFlow(),
+      InventoryPage(),
+      Center(child: InvoiceScreen()),
+      Center(child: Text('Reports')),
+      Center(child: Text('Settings')),
+    ];
+  }
+
+  late List<Widget> _pages; // <- late initialization
 
   final List<String> _titles = [
     'Dashboard',
@@ -48,22 +57,14 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
 
-    if (shouldLogout ?? false) {
-      final success = await AuthService.logout();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+          (route) => false,
+    ).then((_){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Logout Successfully')));
+    });
 
-      if (success) {
-        // Navigate to login screen and clear navigation stack
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-              (route) => false,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Logout failed. Please try again.')),
-        );
-      }
-    }
   }
 
   @override
@@ -166,8 +167,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 onSelected: (value) async {
                   if (value == 'profile') {
                     // Navigate to profile page
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => ProfilePage()));
+
                   } else if (value == 'logout') {
                     await _handleLogout();
                   }
@@ -196,4 +196,57 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
+
+  Widget _buildQuickBooksFlow() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildCategoryTitle("VENDORS"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              FlowItem(label: "Purchase Orders", icon: Icons.shopping_cart),
+              SizedBox(width: 40),
+              FlowItem(label: "Receive Inventory", icon: Icons.inventory),
+              SizedBox(width: 40),
+              FlowItem(label: "Enter Bills", icon: Icons.receipt),
+              SizedBox(width: 40),
+              FlowItem(label: "Pay Bills", icon: Icons.payment),
+            ],
+          ),
+          SizedBox(height: 40),
+          _buildCategoryTitle("CUSTOMERS"),
+          Row(
+            children: [
+              FlowItem(label: "Manage Customers", icon: Icons.edit_document,onTap: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>CustomerPage()));},),
+              SizedBox(width: 40),
+              FlowItem(label: "Quotes", icon: Icons.edit_document, onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => quoteScreen()));
+              },),
+              SizedBox(width: 40),
+              FlowItem(label: "Create Invoices", icon: Icons.receipt_long),
+              SizedBox(width: 40),
+              FlowItem(label: "Receive Payments", icon: Icons.attach_money),
+              SizedBox(width: 40),
+              FlowItem(label: "Record Deposits", icon: Icons.account_balance_wallet),
+            ],
+          ),
+          // Continue adding other sections like EMPLOYEES, BANKING, COMPANY...
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Text(
+        title,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+      ),
+    );
+  }
+
 }

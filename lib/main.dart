@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.grey[100],
         useMaterial3: true,
       ),
-      home: LoginPage(),
+      home: DashboardPage(),
       debugShowCheckedModeBanner: false,
     );
   }
